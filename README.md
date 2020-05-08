@@ -16,6 +16,11 @@ Update your local repo with remote changes.
 git pull
 ```
 
+Create a new branch and checkout
+```
+git checkout -b chris
+```
+
 #### Anaconda
 
 Activate a virtual environment
