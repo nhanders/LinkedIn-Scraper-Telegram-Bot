@@ -29,8 +29,7 @@ def next(update, context):
 
 next_handler = CommandHandler("next", next)
 dispatcher.add_handler(next_handler)
-
-
+ 
 # function to echo what is typed
 def echo(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
