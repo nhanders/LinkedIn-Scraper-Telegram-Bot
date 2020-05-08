@@ -2,8 +2,12 @@
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 import logging
 import threading
+import sys
 
-TOKEN = '1082507548:AAH6h7DxP5WdUwfb9i9Z7EOMjKKSSuNU1Kg'
+sys.path.insert(1, '../secret')
+import secret
+
+TOKEN = secret.TOKEN
 
 updater = Updater(token=TOKEN, use_context=True)
 dispatcher = updater.dispatcher
