@@ -4,7 +4,7 @@ import logging
 import threading
 import sys
 
-sys.path.insert(1, '../secret')
+sys.path.insert(1, './secret')
 import secret
 
 TOKEN = secret.TOKEN
