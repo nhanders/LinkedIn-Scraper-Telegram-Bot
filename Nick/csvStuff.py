@@ -6,8 +6,7 @@ from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
 import csv
 import sys
-sys.path.insert(1, './secret')
-import secret
+from secret import secret
 
 TOKEN = secret.TOKEN
 

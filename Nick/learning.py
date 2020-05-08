@@ -3,9 +3,7 @@ from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 import logging
 import threading
 import sys
-
-sys.path.insert(1, './secret')
-import secret
+from secret import secret
 
 TOKEN = secret.TOKEN
 
