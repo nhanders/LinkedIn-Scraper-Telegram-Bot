@@ -7,13 +7,10 @@
 # -----------------------------------------------------------------------------
 
 from selenium import webdriver
-import time, csv, base64
+import time, csv
 import pandas as pd
 import xlwings as xw
-import Utils, Constants
-
-import importlib
-importlib.reload(Constants)
+import util, constants
 
 # Starts a timer to show how long the program takes to run
 start_time = time.time()
@@ -36,24 +33,24 @@ def getEmployeeData(browser, employee):
         linkedin_activity_path = 'https://www.linkedin.com/in/'+emp_id+'/detail/recent-activity/'
         browser.get(linkedin_activity_path)
 
-        while(not Utils.isPageReady(browser)):
+        while(not util.isPageReady(browser)):
             # Wait 1 second
-            time.sleep(Constants.PAGE_LOAD_TIME)
+            time.sleep(constants.PAGE_LOAD_TIME)
 
         # Data Collection ------------------------------------------------------
 
         # Scroll the page down if dates aren't equal to or over a month
-        while (Utils.pageShouldBeScrolled(browser)):
-            Utils.scrollPage(browser)
+        while (util.pageShouldBeScrolled(browser)):
+            util.scrollPage(browser)
             # Wait 3 seconds for scrolling to do its thing
-            time.sleep(Constants.SCROLL_PAUSE_TIME)
+            time.sleep(constants.SCROLL_PAUSE_TIME)
 
 
         ## Wait 3 seconds
         #time.sleep(3)
 
         # Get post data for employee
-        textList = Utils.getPageData(browser)
+        textList = util.getPageData(browser)
 
     except:
         print("An error occured. Name: ", emp_name)
@@ -166,14 +163,14 @@ print("LinkedIn Data Extractor for PiP")
 print("---------------------------------------------------------------------")
 
 # Maybe ask user to input LinkedIn username and password
-#username = base64.b64decode(Constants.USER_EMAIL).decode("utf-8")
-#password = base64.b64decode(Constants.PASSWORD).decode("utf-8")
+#username = base64.b64decode(constants.USER_EMAIL).decode("utf-8")
+#password = base64.b64decode(constants.PASSWORD).decode("utf-8")
 username = 'christine.court.77@gmail.com'
 password = 'Wildpigs7!'
 
 # PiP employee LinkedIn Details ------------------------------------------------
 
-with open(Constants.EMPLOYEE_DETAILS_PATH) as csv_file:
+with open(constants.EMPLOYEE_DETAILS_PATH) as csv_file:
     pipEmployeeDict = csv.DictReader(csv_file, fieldnames=['name', 'linkedin_id'])
 
     print("List of employees and LinkedIn ID")
@@ -189,16 +186,16 @@ print("---------------------------------------------------------------------")
 # Chrome Driver ----------------------------------------------------------------
 
 # Creation of a new instance of Google Chrome
-browser = webdriver.Chrome(executable_path=Constants.CHROME_DRIVER_PATH)
+browser = webdriver.Chrome(executable_path=constants.CHROME_DRIVER_PATH)
 
 # Login to LinkedIn
-Utils.linkedin_login(browser, username, password)
+util.linkedin_login(browser, username, password)
 print("Logged in to LinkedIn as " + username)
 
 # sleep for 5 seconds so the page can load
 time.sleep(5)
 
-with open(Constants.EMPLOYEE_DETAILS_PATH) as csv_file:
+with open(constants.EMPLOYEE_DETAILS_PATH) as csv_file:
     pipEmployeeDict = csv.DictReader(csv_file, fieldnames=['name', 'linkedin_id'])
 
     print("Starting data extraction")
@@ -225,12 +222,12 @@ print("---------------------------------------------------------------------")
 print("Finished data extraction")
 
 # Write data to Excel --------------------------------------------------------
-print("Writing results to Excel file: " + Constants.EXCEL_RESULTS_PATH)
+print("Writing results to Excel file: " + constants.EXCEL_RESULTS_PATH)
 
 # current date
 today = time.strftime("%d-%m-%Y")
 
-wb = xw.Book(Constants.EXCEL_RESULTS_PATH)
+wb = xw.Book(constants.EXCEL_RESULTS_PATH)
 sht = wb.sheets["Sheet1"]
 
 sht.clear()

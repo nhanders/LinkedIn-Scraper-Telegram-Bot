@@ -46,7 +46,7 @@ def start(update, context):
 # /getResults command
 def getResults(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Getting results...")
-    context.bot.send_document(chat_id=update.effective_chat.id, document=open('Documents/results.xlsx', 'rb'))
+    context.bot.send_document(chat_id=update.effective_chat.id, document=open('documents/results.xlsx', 'rb'))
 
     return START
 
@@ -60,7 +60,7 @@ def process(update, context):
 def upload(update, context):
     file_id = update.message.document.file_id
     newFile = context.bot.get_file(file_id)
-    newFile.download('Documents/input_document.csv')
+    newFile.download('documents/input_document.csv')
     context.bot.send_message(chat_id=update.effective_chat.id, text="File uploaded!")
 
     return PROCESSING
@@ -112,6 +112,9 @@ def main():
 
     # start bot
     updater.start_polling()
+
+    # allow CTRL C to stop running
+    updater.idel()
 
 # MAIN ------------------------------------------------------------------------
 

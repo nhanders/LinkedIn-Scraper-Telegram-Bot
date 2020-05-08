@@ -41,3 +41,10 @@ Export and import virtual environment to/from .yml file.
 conda env export --name scraperEnv > environment.yml
 conda env create --file environment.yml
 ```
+
+### pip
+
+Create requirements.txt
+```
+pip freeze > requirements.txt
+``
