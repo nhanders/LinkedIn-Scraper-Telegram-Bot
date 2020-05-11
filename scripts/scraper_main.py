@@ -5,23 +5,18 @@
 # the LinkedIn data on each employee that involves engagement with PiP's
 # LinkedIn account.
 # -----------------------------------------------------------------------------
-
 from selenium import webdriver
 import time, csv
 import pandas as pd
 import xlwings as xw
-import util, constants
-
-# Starts a timer to show how long the program takes to run
-start_time = time.time()
+from scripts import util, constants
 
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
 
-textList = []
+def getEmployeeData(browser, employee, emp_count, emp_total):
 
-def getEmployeeData(browser, employee):
     emp_name = employee['name']
     emp_id = employee['linkedin_id']
 
@@ -150,7 +145,8 @@ def getEmployeeData(browser, employee):
         emp_results.append([emp_name, "No Data", "No Data"])
 
     if (not error):
-        print("Data extracted for {0:30} {1:5}".format(emp_name, str(round((emp_count/emp_total)*100),2)+"%"))
+        percent_done = round((emp_count/emp_total)*100,2)
+        print("Data extracted for {0:30} {1:5}".format(emp_name, str(percent_done)+"%"))
 
     return emp_results
 
@@ -158,83 +154,113 @@ def getEmployeeData(browser, employee):
 # MAIN
 # -----------------------------------------------------------------------------
 
-print("---------------------------------------------------------------------")
-print("LinkedIn Data Extractor for PiP")
-print("---------------------------------------------------------------------")
+def main(update, context):
 
-# Maybe ask user to input LinkedIn username and password
-#username = base64.b64decode(constants.USER_EMAIL).decode("utf-8")
-#password = base64.b64decode(constants.PASSWORD).decode("utf-8")
-username = 'christine.court.77@gmail.com'
-password = 'Wildpigs7!'
+    # Starts a timer to show how long the program takes to run
+    start_time = time.time()
 
-# PiP employee LinkedIn Details ------------------------------------------------
-
-with open(constants.EMPLOYEE_DETAILS_PATH) as csv_file:
-    pipEmployeeDict = csv.DictReader(csv_file, fieldnames=['name', 'linkedin_id'])
-
-    print("List of employees and LinkedIn ID")
+    print("---------------------------------------------------------------------")
+    print("LinkedIn Data Extractor for PiP")
     print("---------------------------------------------------------------------")
 
-    emp_total = 0
-    for employee in pipEmployeeDict:
-        print("- {0:30}{1:30}".format(employee['name'], employee['linkedin_id']))
-        emp_total += 1
+    # Maybe ask user to input LinkedIn username and password
+    #username = base64.b64decode(constants.USER_EMAIL).decode("utf-8")
+    #password = base64.b64decode(constants.PASSWORD).decode("utf-8")
+    username = 'christine.court.77@gmail.com'
+    password = 'Wildpigs7!'
 
-print("---------------------------------------------------------------------")
+    # PiP employee LinkedIn Details ------------------------------------------------
 
-# Chrome Driver ----------------------------------------------------------------
+    with open(constants.EMPLOYEE_DETAILS_PATH) as csv_file:
+        pipEmployeeDict = csv.DictReader(csv_file, fieldnames=['name', 'linkedin_id'])
 
-# Creation of a new instance of Google Chrome
-browser = webdriver.Chrome(executable_path=constants.CHROME_DRIVER_PATH)
+        print("List of employees and LinkedIn ID")
+        print("---------------------------------------------------------------------")
 
-# Login to LinkedIn
-util.linkedin_login(browser, username, password)
-print("Logged in to LinkedIn as " + username)
+        emp_total = 0
+        for employee in pipEmployeeDict:
+            print("- {0:30}{1:30}".format(employee['name'], employee['linkedin_id']))
+            emp_total += 1
 
-# sleep for 5 seconds so the page can load
-time.sleep(5)
-
-with open(constants.EMPLOYEE_DETAILS_PATH) as csv_file:
-    pipEmployeeDict = csv.DictReader(csv_file, fieldnames=['name', 'linkedin_id'])
-
-    print("Starting data extraction")
     print("---------------------------------------------------------------------")
 
-    results = []
-    emp_count = 0
-    for employee in pipEmployeeDict:
-        emp_count += 1
-        # filter out employees with no known LinkedIn account
-        if employee['linkedin_id']:
-            # get all post data from LinkedIn on employee
-            emp_results = getEmployeeData(browser, employee)
-            for result in emp_results:
-                results.append(result)
-        else:
-            results.append([employee['name'], "No LinkedIn", "No LinkedIn"])
+    # Chrome Driver ----------------------------------------------------------------
 
-# close browser to finish off
-browser.close()
-print("Browser Closed")
+    # Creation of a new instance of Google Chrome
+    browser = webdriver.Chrome(executable_path=constants.CHROME_DRIVER_PATH)
 
-print("---------------------------------------------------------------------")
-print("Finished data extraction")
+    # Login to LinkedIn
+    util.linkedin_login(browser, username, password)
+    print("Logged in to LinkedIn as " + username)
 
-# Write data to Excel --------------------------------------------------------
-print("Writing results to Excel file: " + constants.EXCEL_RESULTS_PATH)
+    # sleep for 5 seconds so the page can load
+    time.sleep(5)
 
-# current date
-today = time.strftime("%d-%m-%Y")
+    with open(constants.EMPLOYEE_DETAILS_PATH) as csv_file:
+        pipEmployeeDict = csv.DictReader(csv_file, fieldnames=['name', 'linkedin_id'])
 
-wb = xw.Book(constants.EXCEL_RESULTS_PATH)
-sht = wb.sheets["Sheet1"]
+        print("Starting data extraction")
+        print("---------------------------------------------------------------------")
 
-sht.clear()
+        results = []
+        emp_count = 0
+        for employee in pipEmployeeDict:
+            emp_count += 1
+            # filter out employees with no known LinkedIn account
+            if employee['linkedin_id']:
+                # get all post data from LinkedIn on employee
+                emp_results = getEmployeeData(browser, employee, emp_count, emp_total)
+                for result in emp_results:
+                    results.append(result)
+                # printing
+                percent_done = round((emp_count/emp_total)*100,2)
+                context.bot.send_message(chat_id=update.effective_chat.id, text="Data Extracted for {0:20} {1:3}".format(employee['name'], str(percent_done)+'%'))
+            else:
+                results.append([employee['name'], "No LinkedIn", "No LinkedIn"])
 
-df = pd.DataFrame(results, columns=['Name', 'Action', 'Time'])
 
-sht.range("A1").value = df
+    # close browser to finish off
+    browser.close()
+    print("Browser Closed")
 
-print("Finished writing results to Excel")
-print("--- %s minutes ---" % round(((time.time() - start_time)/60),2))
+    print("---------------------------------------------------------------------")
+    print("Finished data extraction")
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Finished data extraction")
+
+    # Write data to Excel --------------------------------------------------------
+    print("Writing results to Excel file: " + constants.EXCEL_RESULTS_PATH)
+
+    # current date
+    today = time.strftime("%d-%m-%Y")
+
+    # app = xw.App(visible=False)
+    wb = xw.Book(constants.EXCEL_RESULTS_PATH)
+
+    # if a sheet with today's date already exists
+    for sheet in wb.sheets:
+        if sheet.name == today:
+            sheet.delete()
+
+    wb.sheets.add(name=today)
+    sht = wb.sheets[today]
+
+    sht.clear()
+
+    df = pd.DataFrame(results, columns=['Name', 'Action', 'Time'])
+
+    sht.range("A1").value = df
+
+    sht.autofit()
+
+    wb.save(constants.EXCEL_RESULTS_PATH)
+    wb.close()
+
+    print("Finished writing results to Excel")
+    print("--- %s minutes ---" % round(((time.time() - start_time)/60),2))
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Finished writing results to Excel")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Finished process in {0} minutes.".format(round(((time.time() - start_time)/60),2)))
+
+if __name__ == '__main__':
+    main()

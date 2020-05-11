@@ -18,14 +18,14 @@ git pull
 
 Create a new branch and checkout
 ```
-git checkout -b chris
+git checkout -b branch_name
 ```
 
 #### Anaconda
 
 Activate a virtual environment
 ```
-conda activate scraperEnv
+conda activate botEnv
 ```
 
 Once in the virtual enviromnet, install a package
@@ -38,7 +38,7 @@ pip install package_name
 Export and import virtual environment to/from .yml file.
 
 ```
-conda env export --name scraperEnv > environment.yml
+conda env export --name botEnv > environment.yml
 conda env create --file environment.yml
 ```
 
@@ -47,4 +47,10 @@ conda env create --file environment.yml
 Create requirements.txt
 ```
 pip freeze > requirements.txt
-``
+```
+### Packages
+
+If you get an error about no license key, you may need to run the code below in order for xlwings to work.
+```
+conda install -c conda-forge xlwings
+```
