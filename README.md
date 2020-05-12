@@ -1,4 +1,4 @@
-# LinkedIn-Scraper
+# LinkedIn-Scraper-Telegram-Bot
 
 This repo contains the code for a Telegram-Bot that performs LinkedIn scraping. It was never deployed to Heroku or another
 hosting site, but it was working locally when the project was finished. 
